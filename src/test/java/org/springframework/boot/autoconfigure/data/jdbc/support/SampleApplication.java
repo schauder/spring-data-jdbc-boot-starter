@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.schauderhaft.spring.data.blah;
+package org.springframework.boot.autoconfigure.data.jdbc.support;
 
-import org.springframework.data.annotation.Id;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * @author Jens Schauder
+ * @author Greg Turnquist
  */
-public class Person {
-	@Id
-	String id;
-	String name;
+@SpringBootApplication
+public class SampleApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SampleApplication.class, args);
+	}
 }

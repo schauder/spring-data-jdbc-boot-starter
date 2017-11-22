@@ -13,35 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.schauderhaft.spring.data.jdbc.boot;
+package org.springframework.boot.autoconfigure.data.jdbc;
+
+import java.lang.annotation.Annotation;
 
 import org.springframework.boot.autoconfigure.data.AbstractRepositoryConfigurationSourceSupport;
 import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories;
 import org.springframework.data.jdbc.repository.config.JdbcRepositoryConfigExtension;
 import org.springframework.data.repository.config.RepositoryConfigurationExtension;
 
-import java.lang.annotation.Annotation;
-
 /**
  *
  *
  * @author Jens Schauder
  */
-public class JdbcRepositoryAutoconfigurationRegistrar extends AbstractRepositoryConfigurationSourceSupport{
+public class JdbcRepositoriesAutoconfigureRegistrar extends AbstractRepositoryConfigurationSourceSupport {
+	
 	protected Class<? extends Annotation> getAnnotation() {
 		return EnableJdbcRepositories.class;
 	}
 
 	protected Class<?> getConfiguration() {
-		System.out.println("I'm here");
 		return EnableJdbcRepositoriesConfiguration.class;
 	}
 
 	protected RepositoryConfigurationExtension getRepositoryConfigurationExtension() {
 		return new JdbcRepositoryConfigExtension();
 	}
-
-
+	
 	@EnableJdbcRepositories
 	private static class EnableJdbcRepositoriesConfiguration {
 

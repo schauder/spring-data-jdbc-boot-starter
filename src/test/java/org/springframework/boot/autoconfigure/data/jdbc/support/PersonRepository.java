@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.schauderhaft.spring.data.blah;
+package org.springframework.boot.autoconfigure.data.jdbc.support;
 
 import org.springframework.data.repository.CrudRepository;
 
