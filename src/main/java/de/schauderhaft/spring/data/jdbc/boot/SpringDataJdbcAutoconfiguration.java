@@ -44,7 +44,7 @@ import javax.sql.DataSource;
 @ConditionalOnClass(JdbcRepositoryFactoryBean.class)
 @ConditionalOnMissingBean(JdbcRepositoryFactoryBean.class)
 @Import({
-		//JdbcRepositoryAutoconfigurationRegistrar.class,
+		JdbcRepositoryAutoconfigurationRegistrar.class,
 		JdbcTemplateAutoConfiguration.class})
 @AutoConfigureAfter({DataSourceAutoConfiguration.class})
 public class SpringDataJdbcAutoconfiguration {
