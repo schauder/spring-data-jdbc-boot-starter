@@ -23,12 +23,10 @@ import org.springframework.data.jdbc.repository.config.JdbcRepositoryConfigExten
 import org.springframework.data.repository.config.RepositoryConfigurationExtension;
 
 /**
- *
- *
  * @author Jens Schauder
  */
 public class JdbcRepositoriesAutoconfigureRegistrar extends AbstractRepositoryConfigurationSourceSupport {
-	
+
 	protected Class<? extends Annotation> getAnnotation() {
 		return EnableJdbcRepositories.class;
 	}
@@ -40,7 +38,7 @@ public class JdbcRepositoriesAutoconfigureRegistrar extends AbstractRepositoryCo
 	protected RepositoryConfigurationExtension getRepositoryConfigurationExtension() {
 		return new JdbcRepositoryConfigExtension();
 	}
-	
+
 	@EnableJdbcRepositories
 	private static class EnableJdbcRepositoriesConfiguration {
 

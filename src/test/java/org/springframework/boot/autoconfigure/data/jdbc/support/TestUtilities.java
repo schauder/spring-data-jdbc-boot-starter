@@ -33,8 +33,8 @@ public final class TestUtilities {
 			context.register(configurationClasses);
 		}
 
-		context.register(EmbeddedDataSourceConfiguration.class,
-			JdbcRepositoriesAutoConfiguration.class,
+		context.register(EmbeddedDataSourceConfiguration.class, //
+			JdbcRepositoriesAutoConfiguration.class, //
 			PropertyPlaceholderAutoConfiguration.class);
 
 		context.refresh();

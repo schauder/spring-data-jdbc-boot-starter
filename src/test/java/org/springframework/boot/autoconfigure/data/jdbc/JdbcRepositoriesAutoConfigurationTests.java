@@ -15,7 +15,7 @@
  */
 package org.springframework.boot.autoconfigure.data.jdbc;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.springframework.boot.autoconfigure.data.jdbc.support.TestUtilities.prepareApplicationContext;
 
@@ -44,11 +44,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 @ClassPathExclusions("mybatis-*.jar")
 public class JdbcRepositoriesAutoConfigurationTests {
 
-	private AnnotationConfigApplicationContext context;
-
 	static private DataAccessStrategy dataAccessStrategy;
 	static private NamingStrategy namingStrategy;
 	static private ConversionCustomizer conversionCustomizer;
+
+	private AnnotationConfigApplicationContext context;
 
 	@After
 	public void tearDown() {
@@ -61,7 +61,7 @@ public class JdbcRepositoriesAutoConfigurationTests {
 		this.context = prepareApplicationContext(TestConfiguration.class);
 
 		assertThat(this.context.getBean(DataAccessStrategy.class)).isInstanceOf(DefaultDataAccessStrategy.class);
-		
+
 		assertThat(this.context.getBean(NamedParameterJdbcOperations.class)).isNotNull();
 		assertThat(this.context.getBean(PersonRepository.class)).isNotNull();
 	}

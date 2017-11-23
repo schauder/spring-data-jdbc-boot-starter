@@ -20,11 +20,7 @@ import javax.sql.DataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -52,8 +48,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 @Configuration
 @ConditionalOnBean(DataSource.class)
 @ConditionalOnClass(JdbcRepositoryFactoryBean.class)
-@ConditionalOnMissingBean({JdbcRepositoryFactoryBean.class, JdbcRepositoryConfigExtension.class})
-@ConditionalOnProperty(prefix = "spring.data.jdbc.repositories", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnMissingBean({ JdbcRepositoryFactoryBean.class, JdbcRepositoryConfigExtension.class })
+@ConditionalOnProperty( //
+		prefix = "spring.data.jdbc.repositories", //
+		name = "enabled", //
+		havingValue = "true", //
+		matchIfMissing = true)
 @Import(JdbcRepositoriesAutoconfigureRegistrar.class)
 @AutoConfigureAfter(JdbcTemplateAutoConfiguration.class)
 public class JdbcRepositoriesAutoConfiguration {
@@ -86,9 +86,6 @@ public class JdbcRepositoriesAutoConfiguration {
 			org.apache.ibatis.session.Configuration configuration = new org.apache.ibatis.session.Configuration();
 			configuration.getTypeAliasRegistry().registerAlias("MyBatisContext", MyBatisContext.class);
 
-			// Unit tests in Spring Data JDBC register extra aliases and mappers. I took those out,
-			// sure what the impact is.
-
 			SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
 			sqlSessionFactoryBean.setDataSource(dataSource);
 			sqlSessionFactoryBean.setConfiguration(configuration);
@@ -115,7 +112,8 @@ public class JdbcRepositoriesAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		DataAccessStrategy defaultDataAccessStrategy(NamedParameterJdbcOperations operations, SqlGeneratorSource sqlGeneratorSource, JdbcMappingContext context) {
+		DataAccessStrategy defaultDataAccessStrategy(NamedParameterJdbcOperations operations,
+				SqlGeneratorSource sqlGeneratorSource, JdbcMappingContext context) {
 			return new DefaultDataAccessStrategy(sqlGeneratorSource, operations, context);
 		}
 	}

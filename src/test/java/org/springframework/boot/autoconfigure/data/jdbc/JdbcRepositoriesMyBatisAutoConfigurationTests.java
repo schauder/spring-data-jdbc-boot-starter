@@ -34,10 +34,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
  */
 public class JdbcRepositoriesMyBatisAutoConfigurationTests {
 
-	private AnnotationConfigApplicationContext context;
-
 	static private DataAccessStrategy dataAccessStrategy;
 	static private NamingStrategy namingStrategy;
+
+	private AnnotationConfigApplicationContext context;
 
 	@After
 	public void tearDown() {

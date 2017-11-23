@@ -21,7 +21,7 @@ import org.springframework.data.annotation.Id;
  * @author Jens Schauder
  */
 public class Person {
-	@Id
-	String id;
+
+	@Id String id;
 	String name;
 }
