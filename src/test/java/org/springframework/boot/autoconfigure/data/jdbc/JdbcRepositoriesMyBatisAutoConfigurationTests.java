@@ -16,26 +16,30 @@
 package org.springframework.boot.autoconfigure.data.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.springframework.boot.autoconfigure.data.jdbc.support.TestUtilities.getField;
 import static org.springframework.boot.autoconfigure.data.jdbc.support.TestUtilities.prepareApplicationContext;
 
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.After;
 import org.junit.Test;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.boot.autoconfigure.data.jdbc.support.PersonRepository;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.core.DataAccessStrategy;
-import org.springframework.data.jdbc.mapping.model.NamingStrategy;
-import org.springframework.data.jdbc.mybatis.MyBatisDataAccessStrategy;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 /**
  * Test MyBatis-specific features of Spring Data JDBC.
  * 
  * @author Greg Turnquist
+ * @author Jens Schauder
  */
 public class JdbcRepositoriesMyBatisAutoConfigurationTests {
-
-	static private DataAccessStrategy dataAccessStrategy;
-	static private NamingStrategy namingStrategy;
 
 	private AnnotationConfigApplicationContext context;
 
@@ -47,11 +51,29 @@ public class JdbcRepositoriesMyBatisAutoConfigurationTests {
 	@Test
 	public void myBatisDefaultsWork() {
 
-		this.context = prepareApplicationContext(JdbcRepositoriesAutoConfigurationTests.TestConfiguration.class);
+		this.context = prepareApplicationContext( //
+				JdbcRepositoriesAutoConfigurationTests.TestConfiguration.class, //
+				MyBatisTestConfiguration.class);
 
-		assertThat(this.context.getBean(DataAccessStrategy.class)).isInstanceOf(MyBatisDataAccessStrategy.class);
+		DataAccessStrategy dataAccessStrategy = this.context.getBean(DataAccessStrategy.class);
+		List strategies = getField(dataAccessStrategy, "strategies");
+		assertThat(strategies).hasSize(2);
 
 		assertThat(this.context.getBean(NamedParameterJdbcOperations.class)).isNotNull();
 		assertThat(this.context.getBean(PersonRepository.class)).isNotNull();
+	}
+
+	@Configuration
+	static class MyBatisTestConfiguration {
+
+		@Bean
+		SqlSessionFactory sqlSessionFactory() {
+			return mock(SqlSessionFactory.class);
+		}
+
+		@Bean
+		SqlSessionTemplate sqlSessionTemplate() {
+			return mock(SqlSessionTemplate.class);
+		}
 	}
 }

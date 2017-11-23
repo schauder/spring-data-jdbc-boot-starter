@@ -15,26 +15,24 @@
  */
 package org.springframework.boot.autoconfigure.data.jdbc;
 
+import java.util.Arrays;
+
 import javax.sql.DataSource;
 
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.*;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jdbc.core.DataAccessStrategy;
-import org.springframework.data.jdbc.core.DefaultDataAccessStrategy;
-import org.springframework.data.jdbc.core.SqlGeneratorSource;
+import org.springframework.data.jdbc.core.*;
 import org.springframework.data.jdbc.mapping.model.ConversionCustomizer;
 import org.springframework.data.jdbc.mapping.model.DefaultNamingStrategy;
 import org.springframework.data.jdbc.mapping.model.JdbcMappingContext;
 import org.springframework.data.jdbc.mapping.model.NamingStrategy;
-import org.springframework.data.jdbc.mybatis.MyBatisContext;
-import org.springframework.data.jdbc.mybatis.MyBatisDataAccessStrategy;
 import org.springframework.data.jdbc.repository.config.JdbcRepositoryConfigExtension;
 import org.springframework.data.jdbc.repository.support.JdbcRepositoryFactoryBean;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -54,11 +52,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 		name = "enabled", //
 		havingValue = "true", //
 		matchIfMissing = true)
-@Import(JdbcRepositoriesAutoconfigureRegistrar.class)
+@Import({ JdbcRepositoriesAutoconfigureRegistrar.class, JdbcRepositoriesMyBatisAutoConfiguration.class })
 @AutoConfigureAfter(JdbcTemplateAutoConfiguration.class)
 public class JdbcRepositoriesAutoConfiguration {
 
 	@Bean
+	@ConditionalOnMissingBean
 	JdbcMappingContext jdbcMappingContext(NamingStrategy namingStrategy, ConversionCustomizer conversionCustomizer) {
 		return new JdbcMappingContext(namingStrategy, conversionCustomizer);
 	}
@@ -75,47 +74,26 @@ public class JdbcRepositoriesAutoConfiguration {
 		return conversionService -> {};
 	}
 
-	@Configuration
-	@ConditionalOnClass(SqlSessionFactory.class)
-	@AutoConfigureAfter(DataSourceAutoConfiguration.class)
-	static class MyBatisConfiguration {
-
-		@Bean
-		SqlSessionFactoryBean createSessionFactory(DataSource dataSource) {
-
-			org.apache.ibatis.session.Configuration configuration = new org.apache.ibatis.session.Configuration();
-			configuration.getTypeAliasRegistry().registerAlias("MyBatisContext", MyBatisContext.class);
-
-			SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
-			sqlSessionFactoryBean.setDataSource(dataSource);
-			sqlSessionFactoryBean.setConfiguration(configuration);
-
-			return sqlSessionFactoryBean;
-		}
-
-		@Bean
-		@ConditionalOnMissingBean
-		DataAccessStrategy myBatisDataAccessStrategy(SqlSessionFactory factory) {
-			return new MyBatisDataAccessStrategy(factory);
-		}
+	@Bean
+	@ConditionalOnMissingBean
+	SqlGeneratorSource sqlGeneratorSource(JdbcMappingContext context) {
+		return new SqlGeneratorSource(context);
 	}
 
-	@Configuration
-	@ConditionalOnMissingClass("org.apache.ibatis.session.SqlSessionFactory")
-	@AutoConfigureAfter(JdbcTemplateAutoConfiguration.class)
-	static class JdbcTemplateBasedConfiguration {
-
-		@Bean
-		SqlGeneratorSource sqlGeneratorSource(JdbcMappingContext context) {
-			return new SqlGeneratorSource(context);
-		}
-
-		@Bean
-		@ConditionalOnMissingBean
-		DataAccessStrategy defaultDataAccessStrategy(NamedParameterJdbcOperations operations,
-				SqlGeneratorSource sqlGeneratorSource, JdbcMappingContext context) {
-			return new DefaultDataAccessStrategy(sqlGeneratorSource, operations, context);
-		}
+	@Bean
+	@ConditionalOnMissingBean
+	DataAccessStrategy dataAccessStrategy(NamedParameterJdbcOperations operations, SqlGeneratorSource sqlGeneratorSource,
+			JdbcMappingContext context) {
+		return buildDataAccessStrategy(new DefaultDataAccessStrategy(sqlGeneratorSource, operations, context));
 	}
 
+	static DataAccessStrategy buildDataAccessStrategy(DataAccessStrategy... accessStrategies) {
+
+		DelegatingDataAccessStrategy delegatingDataAccessStrategy = new DelegatingDataAccessStrategy();
+
+		CascadingDataAccessStrategy strategy = new CascadingDataAccessStrategy(Arrays.asList(accessStrategies));
+		delegatingDataAccessStrategy.setDelegate(strategy);
+
+		return strategy;
+	}
 }

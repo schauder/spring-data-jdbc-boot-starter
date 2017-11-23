@@ -17,7 +17,10 @@ package org.springframework.boot.autoconfigure.data.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.springframework.boot.autoconfigure.data.jdbc.support.TestUtilities.getField;
 import static org.springframework.boot.autoconfigure.data.jdbc.support.TestUtilities.prepareApplicationContext;
+
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Test;
@@ -29,8 +32,8 @@ import org.springframework.boot.testsupport.runner.classpath.ModifiedClassPathRu
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jdbc.core.CascadingDataAccessStrategy;
 import org.springframework.data.jdbc.core.DataAccessStrategy;
-import org.springframework.data.jdbc.core.DefaultDataAccessStrategy;
 import org.springframework.data.jdbc.mapping.model.ConversionCustomizer;
 import org.springframework.data.jdbc.mapping.model.NamingStrategy;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -39,6 +42,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
  * Test the core features of Spring Data JDBC with MyBatis excluded from the testing classpath.
  *
  * @author Greg Turnquist
+ * @author Jens Schauder
  */
 @RunWith(ModifiedClassPathRunner.class)
 @ClassPathExclusions("mybatis-*.jar")
@@ -60,7 +64,11 @@ public class JdbcRepositoriesAutoConfigurationTests {
 
 		this.context = prepareApplicationContext(TestConfiguration.class);
 
-		assertThat(this.context.getBean(DataAccessStrategy.class)).isInstanceOf(DefaultDataAccessStrategy.class);
+		DataAccessStrategy dataAccessStrategy = this.context.getBean(DataAccessStrategy.class);
+		assertThat(dataAccessStrategy).isInstanceOf(CascadingDataAccessStrategy.class);
+
+		List strategies = getField(dataAccessStrategy, "strategies");
+		assertThat(strategies).hasSize(1);
 
 		assertThat(this.context.getBean(NamedParameterJdbcOperations.class)).isNotNull();
 		assertThat(this.context.getBean(PersonRepository.class)).isNotNull();

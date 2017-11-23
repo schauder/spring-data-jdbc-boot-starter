@@ -19,9 +19,14 @@ import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoCon
 import org.springframework.boot.autoconfigure.data.jdbc.JdbcRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.data.jdbc.core.CascadingDataAccessStrategy;
+import org.springframework.data.jdbc.core.DataAccessStrategy;
+
+import java.lang.reflect.Field;
 
 /**
  * @author Greg Turnquist
+ * @author Jens Schauder
  */
 public final class TestUtilities {
 
@@ -40,5 +45,17 @@ public final class TestUtilities {
 		context.refresh();
 
 		return context;
+	}
+
+	public static <T> T getField(Object source, String name) {
+
+		try {
+
+			Field field = CascadingDataAccessStrategy.class.getDeclaredField(name);
+			field.setAccessible(true);
+			return (T) field.get(source);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
