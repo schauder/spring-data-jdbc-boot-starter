@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.core.CascadingDataAccessStrategy;
 import org.springframework.data.jdbc.core.DataAccessStrategy;
+import org.springframework.data.jdbc.core.DefaultDataAccessStrategy;
 import org.springframework.data.jdbc.mapping.model.ConversionCustomizer;
 import org.springframework.data.jdbc.mapping.model.NamingStrategy;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -68,7 +69,7 @@ public class JdbcRepositoriesAutoConfigurationTests {
 		assertThat(dataAccessStrategy).isInstanceOf(CascadingDataAccessStrategy.class);
 
 		List strategies = getField(dataAccessStrategy, "strategies");
-		assertThat(strategies).hasSize(1);
+		assertThat(strategies).extracting(Object::getClass).containsExactly(DefaultDataAccessStrategy.class);
 
 		assertThat(this.context.getBean(NamedParameterJdbcOperations.class)).isNotNull();
 		assertThat(this.context.getBean(PersonRepository.class)).isNotNull();

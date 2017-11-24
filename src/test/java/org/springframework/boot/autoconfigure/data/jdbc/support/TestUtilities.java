@@ -15,14 +15,12 @@
  */
 package org.springframework.boot.autoconfigure.data.jdbc.support;
 
+import java.lang.reflect.Field;
+
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.jdbc.JdbcRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.data.jdbc.core.CascadingDataAccessStrategy;
-import org.springframework.data.jdbc.core.DataAccessStrategy;
-
-import java.lang.reflect.Field;
 
 /**
  * @author Greg Turnquist
@@ -39,8 +37,8 @@ public final class TestUtilities {
 		}
 
 		context.register(EmbeddedDataSourceConfiguration.class, //
-			JdbcRepositoriesAutoConfiguration.class, //
-			PropertyPlaceholderAutoConfiguration.class);
+				JdbcRepositoriesAutoConfiguration.class, //
+				PropertyPlaceholderAutoConfiguration.class);
 
 		context.refresh();
 
@@ -51,7 +49,7 @@ public final class TestUtilities {
 
 		try {
 
-			Field field = CascadingDataAccessStrategy.class.getDeclaredField(name);
+			Field field = source.getClass().getDeclaredField(name);
 			field.setAccessible(true);
 			return (T) field.get(source);
 		} catch (Exception e) {

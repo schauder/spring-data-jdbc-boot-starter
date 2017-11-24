@@ -17,6 +17,7 @@ package org.springframework.boot.autoconfigure.data.jdbc;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -37,15 +38,16 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
  */
 @Configuration
 @ConditionalOnClass(SqlSessionFactory.class)
-@Import(MybatisAutoConfiguration.class)
+@AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class JdbcRepositoriesMyBatisAutoConfiguration {
 
-	@Bean("dataAccessStrategy")
+	@Bean
 	@ConditionalOnMissingBean
-	DataAccessStrategy dataAccessStrategyWithMyBatisSupport(NamedParameterJdbcOperations operations,
+	DataAccessStrategy dataAccessStrategy(NamedParameterJdbcOperations operations,
 			SqlGeneratorSource sqlGeneratorSource, JdbcMappingContext context, SqlSessionFactory sqlSessionFactory) {
-		System.out.println("configuring mybatis");
-		return JdbcRepositoriesAutoConfiguration.buildDataAccessStrategy(new MyBatisDataAccessStrategy(sqlSessionFactory),
+
+		return JdbcRepositoriesAutoConfiguration.buildDataAccessStrategy( //
+				new MyBatisDataAccessStrategy(sqlSessionFactory), //
 				new DefaultDataAccessStrategy(sqlGeneratorSource, operations, context));
 	}
 

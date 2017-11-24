@@ -31,6 +31,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.core.DataAccessStrategy;
+import org.springframework.data.jdbc.core.DefaultDataAccessStrategy;
+import org.springframework.data.jdbc.mybatis.MyBatisDataAccessStrategy;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 /**
@@ -57,7 +59,7 @@ public class JdbcRepositoriesMyBatisAutoConfigurationTests {
 
 		DataAccessStrategy dataAccessStrategy = this.context.getBean(DataAccessStrategy.class);
 		List strategies = getField(dataAccessStrategy, "strategies");
-		assertThat(strategies).hasSize(2);
+		assertThat(strategies).extracting(Object::getClass).containsExactly(MyBatisDataAccessStrategy.class, DefaultDataAccessStrategy.class);
 
 		assertThat(this.context.getBean(NamedParameterJdbcOperations.class)).isNotNull();
 		assertThat(this.context.getBean(PersonRepository.class)).isNotNull();
