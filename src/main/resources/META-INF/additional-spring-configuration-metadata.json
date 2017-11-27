@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "spring.data.jdbc.repositories",
+      "type": "java.lang.Boolean",
+      "description": "Enable Spring Data JDBC repositories.",
+      "defaultValue": true
+    }
+  ]
+}
