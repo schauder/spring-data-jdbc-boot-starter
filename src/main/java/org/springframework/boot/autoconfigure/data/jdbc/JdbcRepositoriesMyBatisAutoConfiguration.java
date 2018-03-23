@@ -15,6 +15,7 @@
  */
 package org.springframework.boot.autoconfigure.data.jdbc;
 
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -22,13 +23,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.jdbc.core.DataAccessStrategy;
 import org.springframework.data.jdbc.core.DefaultDataAccessStrategy;
 import org.springframework.data.jdbc.core.SqlGeneratorSource;
 import org.springframework.data.jdbc.mapping.model.JdbcMappingContext;
 import org.springframework.data.jdbc.mybatis.MyBatisDataAccessStrategy;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 /**
  * Autoconfigure Spring Data JDBC
@@ -43,12 +42,12 @@ public class JdbcRepositoriesMyBatisAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	DataAccessStrategy dataAccessStrategy(NamedParameterJdbcOperations operations,
-			SqlGeneratorSource sqlGeneratorSource, JdbcMappingContext context, SqlSessionFactory sqlSessionFactory) {
+	DataAccessStrategy dataAccessStrategy(SqlGeneratorSource sqlGeneratorSource, JdbcMappingContext context,
+			SqlSession sqlSession) {
 
 		return JdbcRepositoriesAutoConfiguration.buildDataAccessStrategy( //
-				new MyBatisDataAccessStrategy(sqlSessionFactory), //
-				new DefaultDataAccessStrategy(sqlGeneratorSource, operations, context));
+				new MyBatisDataAccessStrategy(sqlSession), //
+				new DefaultDataAccessStrategy(sqlGeneratorSource, context));
 	}
 
 }

@@ -28,7 +28,11 @@ import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jdbc.core.*;
+import org.springframework.data.jdbc.core.CascadingDataAccessStrategy;
+import org.springframework.data.jdbc.core.DataAccessStrategy;
+import org.springframework.data.jdbc.core.DefaultDataAccessStrategy;
+import org.springframework.data.jdbc.core.DelegatingDataAccessStrategy;
+import org.springframework.data.jdbc.core.SqlGeneratorSource;
 import org.springframework.data.jdbc.mapping.model.ConversionCustomizer;
 import org.springframework.data.jdbc.mapping.model.DefaultNamingStrategy;
 import org.springframework.data.jdbc.mapping.model.JdbcMappingContext;
@@ -58,8 +62,9 @@ public class JdbcRepositoriesAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	JdbcMappingContext jdbcMappingContext(NamingStrategy namingStrategy, ConversionCustomizer conversionCustomizer) {
-		return new JdbcMappingContext(namingStrategy, conversionCustomizer);
+	JdbcMappingContext jdbcMappingContext(NamingStrategy namingStrategy, ConversionCustomizer conversionCustomizer,
+			NamedParameterJdbcOperations operation) {
+		return new JdbcMappingContext(namingStrategy, operation, conversionCustomizer);
 	}
 
 	@Bean
@@ -82,9 +87,8 @@ public class JdbcRepositoriesAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	DataAccessStrategy dataAccessStrategy(NamedParameterJdbcOperations operations, SqlGeneratorSource sqlGeneratorSource,
-			JdbcMappingContext context) {
-		return buildDataAccessStrategy(new DefaultDataAccessStrategy(sqlGeneratorSource, operations, context));
+	DataAccessStrategy dataAccessStrategy(SqlGeneratorSource sqlGeneratorSource, JdbcMappingContext context) {
+		return buildDataAccessStrategy(new DefaultDataAccessStrategy(sqlGeneratorSource, context));
 	}
 
 	static DataAccessStrategy buildDataAccessStrategy(DataAccessStrategy... accessStrategies) {
