@@ -15,21 +15,19 @@
  */
 package org.springframework.boot.autoconfigure.data.jdbc;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.springframework.boot.autoconfigure.data.jdbc.support.TestUtilities.getField;
-import static org.springframework.boot.autoconfigure.data.jdbc.support.TestUtilities.prepareApplicationContext;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 
-import org.junit.After;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.jdbc.support.PersonRepository;
-import org.springframework.boot.testsupport.runner.classpath.ClassPathExclusions;
-import org.springframework.boot.testsupport.runner.classpath.ModifiedClassPathRunner;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.boot.autoconfigure.data.jdbc.support.TestUtilities;
+import org.springframework.boot.test.context.FilteredClassLoader;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.core.CascadingDataAccessStrategy;
@@ -45,34 +43,31 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
  * @author Greg Turnquist
  * @author Jens Schauder
  */
-@RunWith(ModifiedClassPathRunner.class)
-@ClassPathExclusions("mybatis-*.jar")
 public class JdbcRepositoriesAutoConfigurationTests {
 
 	static private DataAccessStrategy dataAccessStrategy;
 	static private NamingStrategy namingStrategy;
 	static private ConversionCustomizer conversionCustomizer;
 
-	private AnnotationConfigApplicationContext context;
-
-	@After
-	public void tearDown() {
-		this.context.close();
-	}
+	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+			.withClassLoader(new FilteredClassLoader(SqlSessionFactory.class));
 
 	@Test
 	public void defaultDataAccessStrategyWhenNoOther() {
 
-		this.context = prepareApplicationContext(TestConfiguration.class);
+		contextRunner.withConfiguration(AutoConfigurations.of(TestConfiguration.class)).run(context -> { //
+			assertThat(context) //
+					.hasSingleBean(NamedParameterJdbcOperations.class) //
+					.hasSingleBean(PersonRepository.class) //
+					.getBean(DataAccessStrategy.class) //
+					.isOfAnyClassIn(CascadingDataAccessStrategy.class) //
+					.satisfies(das -> { //
+						assertThat(TestUtilities.<List> getField(das, "strategies")) //
+								.extracting(Object::getClass) //
+								.containsExactly(DefaultDataAccessStrategy.class); //
+					}); //
+		});
 
-		DataAccessStrategy dataAccessStrategy = this.context.getBean(DataAccessStrategy.class);
-		assertThat(dataAccessStrategy).isInstanceOf(CascadingDataAccessStrategy.class);
-
-		List strategies = getField(dataAccessStrategy, "strategies");
-		assertThat(strategies).extracting(Object::getClass).containsExactly(DefaultDataAccessStrategy.class);
-
-		assertThat(this.context.getBean(NamedParameterJdbcOperations.class)).isNotNull();
-		assertThat(this.context.getBean(PersonRepository.class)).isNotNull();
 	}
 
 	@Test
@@ -82,11 +77,12 @@ public class JdbcRepositoriesAutoConfigurationTests {
 		namingStrategy = mock(NamingStrategy.class);
 		conversionCustomizer = mock(ConversionCustomizer.class);
 
-		this.context = prepareApplicationContext(OverrideEverything.class);
-
-		assertThat(this.context.getBean(DataAccessStrategy.class)).isEqualTo(dataAccessStrategy);
-		assertThat(this.context.getBean(NamingStrategy.class)).isEqualTo(namingStrategy);
-		assertThat(this.context.getBean(ConversionCustomizer.class)).isEqualTo(conversionCustomizer);
+		contextRunner.withConfiguration(AutoConfigurations.of(OverrideEverything.class)) //
+				.run(context -> { //
+					assertThat(context).getBean(DataAccessStrategy.class).isEqualTo(dataAccessStrategy); //
+					assertThat(context).getBean(NamingStrategy.class).isEqualTo(namingStrategy); //
+					assertThat(context).getBean(ConversionCustomizer.class).isEqualTo(conversionCustomizer); //
+				});
 	}
 
 	@Configuration
