@@ -8,6 +8,62 @@
 	<artifactId>spring-boot-autoconfigure-spring-data-jdbc</artifactId>
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 
+	<name>Spring Data JDBC - Autoconfiguration for Spring Boot</name>
+	<description>Autoconfigure a Spring Data JDBC automatically</description>
+
+	<inceptionYear>2017</inceptionYear>
+
+	<organization>
+		<name>Pivotal, Inc.</name>
+		<url>https://spring.io</url>
+	</organization>
+
+	<developers>
+		<developer>
+			<id>jschauder</id>
+			<name>Jens Schauder</name>
+			<email>jschauder (at) pivotal.io</email>
+			<organization>Pivotal Software, Inc.</organization>
+			<roles>
+				<role>Co-lead</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
+			<id>gturnquist</id>
+			<name>Greg Turnquist</name>
+			<email>gturnquist (at) pivotal.io</email>
+			<organization>Pivotal Software, Inc.</organization>
+			<roles>
+				<role>Co-lead</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+			<comments>
+				Copyright 2011-2017 the original author or authors.
+
+				Licensed under the Apache License, Version 2.0 (the "License");
+				you may not use this file except in compliance with the License.
+				You may obtain a copy of the License at
+
+				http://www.apache.org/licenses/LICENSE-2.0
+
+				Unless required by applicable law or agreed to in writing, software
+				distributed under the License is distributed on an "AS IS" BASIS,
+				WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+				implied.
+				See the License for the specific language governing permissions and
+				limitations under the License.
+			</comments>
+		</license>
+	</licenses>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -17,6 +73,107 @@
 		<mybatis.version>3.4.4</mybatis.version>
 		<hsqldb.version>2.4.0</hsqldb.version>
 	</properties>
+
+	<profiles>
+		<profile>
+			<id>distribute</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.0.0</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>gpg</id>
+
+			<properties>
+				<gpg.useagent>true</gpg.useagent>
+			</properties>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifact</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>snapshot</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jfrog.buildinfo</groupId>
+						<artifactId>artifactory-maven-plugin</artifactId>
+						<version>2.6.1</version>
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<id>build-info</id>
+								<goals>
+									<goal>publish</goal>
+								</goals>
+								<configuration>
+									<deployProperties>
+										<archives>*:*:*:*@zip zip.name:spring-data-jdbc-boot-starter, zip.displayname:Spring Data JDBC Boot Autoconfiguration, zip.deployed:false</archives>
+									</deployProperties>
+									<publisher>
+										<contextUrl>http://repo.spring.io</contextUrl>
+										<username>{{USERNAME}}</username>
+										<password>{{PASSWORD}}</password>
+										<repoKey>libs-snapshot-local</repoKey>
+										<snapshotRepoKey>libs-snapshot-local</snapshotRepoKey>
+									</publisher>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+	</profiles>
 
 	<dependencies>
 
@@ -98,6 +255,13 @@
             </plugin>
         </plugins>
 	</build>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>spring-plugins-release</id>
+			<url>https://repo.spring.io/plugins-release</url>
+		</pluginRepository>
+	</pluginRepositories>
 
 	<repositories>
         <repository>
